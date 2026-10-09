@@ -18,23 +18,53 @@ single-notebook experiments at the top level.
 
 ## What is wired up right now (stepper-control)
 
-| Part | Part pin | Pi pin (physical) | BCM / signal |
-|---|---|---|---|
-| ADS7830 ADC | VCC, GND | 1 (3.3V), 6 (GND) | power |
-| ADS7830 ADC | SDA, SCL | 3, 5 | GPIO 2 (SDA1), GPIO 3 (SCL1) |
-| Potentiometer | outer legs | 3.3V rail, GND rail | from pins 1 / 6 |
-| Potentiometer | middle leg | ADS7830 **A0** | analog |
-| Joystick | VCC, GND | 3.3V rail, GND rail | power (3.3V, not 5V) |
-| Joystick | VRy | ADS7830 **A1** | analog |
-| Joystick | VRx | ADS7830 **A2** | analog, unused so far |
-| Joystick | SW | not connected | |
-| LCD1602 (PCF8574 backpack) | VCC, GND | 2 (5V), GND | power |
-| LCD1602 | SDA, SCL | 3, 5 | shares the I2C bus |
-| ULN2003 stepper driver | IN1, IN2, IN3, IN4 | 11, 12, 13, 15 | GPIO 17, 18, 27, 22 |
-| ULN2003 stepper driver | +, - | 4 (5V), GND | power |
-| 74HC595 shift register | on the breadboard but **not connected to anything** | | |
+How the power and signals actually run, in the order they're chained:
 
-I2C addresses on bus 1: `0x4b` ADS7830, LCD backpack auto-detected (`0x27` / `0x3f` / `0x20` / `0x38`).
+**Power rails on the breadboard**
+- Positive rail <- Pi **3.3V** pin (pin 1).
+- Negative rail <- Pi **GND** pin (pin 6).
+- The rails feed the potentiometer and the joystick. Nothing else is on them.
+
+**ADS7830 ADC (the only analog input)**
+- Two wires from the ADS7830's SDA and SCL go straight to the Pi's SDA (pin 3, GPIO 2) and SCL (pin 5, GPIO 3).
+- The ADS7830 is the I2C hub: the LCD's SDA and SCL plug into the breadboard and connect to the ADS7830's SDA and SCL, not directly to the Pi.
+- I2C address `0x4b`.
+
+**LCD1602 (PCF8574 backpack)**
+- VCC <- Pi **5V** pin (pin 2). GND <- Pi GND pin.
+- SDA and SCL -> breadboard -> ADS7830's SDA and SCL (which carry on to the Pi).
+- Address auto-detected (`0x27` / `0x3f` / `0x20` / `0x38`).
+
+**Potentiometer**
+- Outer legs: breadboard positive rail (3.3V) and negative rail (GND).
+- Middle leg -> ADS7830 **A0**.
+
+**Joystick**
+- VCC <- breadboard positive rail (3.3V). GND <- breadboard negative rail.
+- VRx -> ADS7830 **A2**. VRy -> ADS7830 **A1**. SW not connected.
+
+**Stepper motor (28BYJ-48 on ULN2003 driver board)**
+- IN1 -> GPIO 17 (pin 11), IN2 -> GPIO 18 (pin 12), IN3 -> GPIO 27 (pin 13), IN4 -> GPIO 22 (pin 15).
+- Driver + <- Pi **5V** pin (pin 4). Driver - <- Pi GND pin.
+
+**Not connected:** the 74HC595 shift register sitting on the breadboard.
+
+Summary table:
+
+| Part | Part pin | Goes to |
+|---|---|---|
+| Breadboard + rail | | Pi pin 1 (3.3V) |
+| Breadboard - rail | | Pi pin 6 (GND) |
+| ADS7830 | SDA, SCL | Pi pin 3 (GPIO 2), pin 5 (GPIO 3) |
+| ADS7830 | A0 | pot middle leg |
+| ADS7830 | A1 | joystick VRy |
+| ADS7830 | A2 | joystick VRx |
+| LCD1602 | VCC, GND | Pi pin 2 (5V), Pi GND |
+| LCD1602 | SDA, SCL | breadboard -> ADS7830 SDA, SCL |
+| Potentiometer | outer legs | breadboard + and - rails |
+| Joystick | VCC, GND | breadboard + and - rails |
+| ULN2003 | IN1, IN2, IN3, IN4 | GPIO 17, 18, 27, 22 (pins 11, 12, 13, 15) |
+| ULN2003 | +, - | Pi pin 4 (5V), Pi GND |
 
 ## Pi 4 GPIO header map
 

@@ -15,21 +15,22 @@ Only one notebook at a time can own the motor pins or the LCD. Shut others down 
     ~/jupyter-env/bin/jupyter notebook --notebook-dir=$HOME
 
 ## Wiring
-Everything analog goes through the ADS7830 ADC (I2C address 0x4b). The LCD shares the same I2C pins.
+Everything analog goes through the ADS7830 ADC (I2C address 0x4b). The LCD's SDA/SCL connect to the
+ADS7830's SDA/SCL via the breadboard, and the ADS7830 connects on to the Pi.
 
-| Part | Pin | Pi connection |
+| Part | Pin | Connection |
 |---|---|---|
-| ADS7830 | VCC / GND | 3.3V / GND |
-| ADS7830 | SDA / SCL | pin 3 (GPIO 2) / pin 5 (GPIO 3) |
-| Pot | outer legs | 3.3V and GND |
+| Breadboard + / - rails | | Pi pin 1 (3.3V) / Pi pin 6 (GND) |
+| ADS7830 | SDA / SCL | Pi pin 3 (GPIO 2) / pin 5 (GPIO 3) |
+| Pot | outer legs | breadboard + and - rails |
 | Pot | middle leg | ADS7830 A0 |
-| Joystick | VCC / GND | 3.3V / GND |
+| Joystick | VCC / GND | breadboard + and - rails |
 | Joystick | VRy | ADS7830 A1 |
 | Joystick | VRx | ADS7830 A2 (unused for now) |
-| LCD backpack | VCC / GND | 5V / GND |
-| LCD backpack | SDA / SCL | pin 3 / pin 5 (shared) |
+| LCD backpack | VCC / GND | Pi pin 2 (5V) / Pi GND |
+| LCD backpack | SDA / SCL | breadboard -> ADS7830 SDA / SCL |
 | ULN2003 | IN1, IN2, IN3, IN4 | GPIO 17, 18, 27, 22 |
-| ULN2003 | + / - | 5V / GND |
+| ULN2003 | + / - | Pi pin 4 (5V) / Pi GND |
 
 ## Settings worth knowing (top of cell 1)
 - `JOY_UP_IS_LOW`  flip if forward/backward are swapped
